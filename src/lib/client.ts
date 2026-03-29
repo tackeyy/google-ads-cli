@@ -78,6 +78,30 @@ export class GadsClient {
     };
   }
 
+  async listCampaignBudgets(): Promise<Array<{ id: string; name: string; status: string; budgetMicros: number; isUnlimited: boolean }>> {
+    const rows = await this.gaqlSearch(`
+      SELECT
+        campaign.id,
+        campaign.name,
+        campaign.status,
+        campaign_budget.amount_micros,
+        campaign_budget.explicitly_shared
+      FROM campaign
+      ORDER BY campaign.id
+    `);
+    return rows.map((row) => {
+      const r = row as { campaign?: Record<string, unknown>; campaignBudget?: Record<string, unknown> };
+      const budgetMicros = Number(r.campaignBudget?.["amountMicros"] ?? 0);
+      return {
+        id: String(r.campaign?.["id"] ?? ""),
+        name: String(r.campaign?.["name"] ?? ""),
+        status: String(r.campaign?.["status"] ?? ""),
+        budgetMicros,
+        isUnlimited: budgetMicros === 0,
+      };
+    });
+  }
+
   async listCampaigns(): Promise<Array<{ id: string; name: string; status: string; budget: string }>> {
     const rows = await this.gaqlSearch(`
       SELECT
