@@ -158,6 +158,8 @@ export class GadsClient {
   }
 
   async listAdGroupIdsByCampaign(campaignId: string): Promise<string[]> {
+    // campaignId must be a numeric string to prevent GAQL injection
+    if (!/^\d+$/.test(campaignId)) throw new Error("不正なキャンペーンID");
     const rows = await this.gaqlSearch(`
       SELECT ad_group.id
       FROM ad_group
@@ -171,6 +173,8 @@ export class GadsClient {
   }
 
   async listAdCompositeIdsByCampaign(campaignId: string): Promise<string[]> {
+    // campaignId must be a numeric string to prevent GAQL injection
+    if (!/^\d+$/.test(campaignId)) throw new Error("不正なキャンペーンID");
     const rows = await this.gaqlSearch(`
       SELECT ad_group_ad.ad.id, ad_group_ad.ad_group
       FROM ad_group_ad

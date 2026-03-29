@@ -76,6 +76,29 @@ export class GadsClient {
             timeZone: String(c["timeZone"] ?? ""),
         };
     }
+    async listCampaignBudgets() {
+        const rows = await this.gaqlSearch(`
+      SELECT
+        campaign.id,
+        campaign.name,
+        campaign.status,
+        campaign_budget.amount_micros,
+        campaign_budget.explicitly_shared
+      FROM campaign
+      ORDER BY campaign.id
+    `);
+        return rows.map((row) => {
+            const r = row;
+            const budgetMicros = Number(r.campaignBudget?.["amountMicros"] ?? 0);
+            return {
+                id: String(r.campaign?.["id"] ?? ""),
+                name: String(r.campaign?.["name"] ?? ""),
+                status: String(r.campaign?.["status"] ?? ""),
+                budgetMicros,
+                isUnlimited: budgetMicros === 0,
+            };
+        });
+    }
     async listCampaigns() {
         const rows = await this.gaqlSearch(`
       SELECT
@@ -129,6 +152,9 @@ export class GadsClient {
         return resp.results.map((r) => r.resourceName);
     }
     async listAdGroupIdsByCampaign(campaignId) {
+        // campaignId must be a numeric string to prevent GAQL injection
+        if (!/^\d+$/.test(campaignId))
+            throw new Error("不正なキャンペーンID");
         const rows = await this.gaqlSearch(`
       SELECT ad_group.id
       FROM ad_group
@@ -141,6 +167,9 @@ export class GadsClient {
         }).filter(Boolean);
     }
     async listAdCompositeIdsByCampaign(campaignId) {
+        // campaignId must be a numeric string to prevent GAQL injection
+        if (!/^\d+$/.test(campaignId))
+            throw new Error("不正なキャンペーンID");
         const rows = await this.gaqlSearch(`
       SELECT ad_group_ad.ad.id, ad_group_ad.ad_group
       FROM ad_group_ad

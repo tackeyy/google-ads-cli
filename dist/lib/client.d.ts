@@ -11,6 +11,13 @@ export declare class GadsClient {
         currencyCode: string;
         timeZone: string;
     }>;
+    listCampaignBudgets(): Promise<Array<{
+        id: string;
+        name: string;
+        status: string;
+        budgetMicros: number;
+        isUnlimited: boolean;
+    }>>;
     listCampaigns(): Promise<Array<{
         id: string;
         name: string;
