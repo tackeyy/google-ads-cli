@@ -1,7 +1,7 @@
 {
   "name": "google-ads-cli",
   "version": "0.1.0",
-  "description": "Google Ads CLI — キャンペーン・広告セット・インサイト管理",
+  "description": "Google Ads CLI — キャンペーン・広告セット・インサイト・予算アラート管理",
   "type": "module",
   "bin": {
     "google-ads-cli": "dist/cli/index.js"
@@ -26,5 +26,16 @@
     "dist/lib"
   ],
   "license": "MIT",
-  "author": "tackeyy"
+  "author": "tackeyy",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tackeyy/google-ads-cli.git"
+  },
+  "keywords": [
+    "google-ads",
+    "cli",
+    "budget",
+    "campaigns",
+    "advertising"
+  ]
 }
