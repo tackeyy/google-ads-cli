@@ -37,17 +37,24 @@ export class GadsClient {
       const body = await res.text();
       throw new Error(`API エラー ${res.status}: ${body}`);
     }
-    // searchStream returns NDJSON (one JSON object per line)
+    // searchStream returns a JSON array of stream chunks: [{results: [...]}, ...]
     const text = await res.text();
     const results: Record<string, unknown>[] = [];
-    for (const line of text.split("\n")) {
-      if (!line.trim() || line.trim() === "[" || line.trim() === "]") continue;
-      const clean = line.replace(/^,/, "").trim();
-      if (!clean) continue;
-      try {
-        const obj = JSON.parse(clean);
-        if (obj.results) results.push(...obj.results);
-      } catch { /* skip */ }
+    try {
+      const chunks = JSON.parse(text) as Array<{ results?: Record<string, unknown>[] }>;
+      for (const chunk of chunks) {
+        if (chunk.results) results.push(...chunk.results);
+      }
+    } catch {
+      // fallback: NDJSON line-by-line
+      for (const line of text.split("\n")) {
+        const clean = line.replace(/^[,\[\]]/, "").trim();
+        if (!clean) continue;
+        try {
+          const obj = JSON.parse(clean) as { results?: Record<string, unknown>[] };
+          if (obj.results) results.push(...obj.results);
+        } catch { /* skip */ }
+      }
     }
     return results;
   }
@@ -111,6 +118,18 @@ export class GadsClient {
       throw new Error(`API エラー ${res.status}: ${body}`);
     }
     return res.json() as Promise<{ results: Array<{ resourceName: string }> }>;
+  }
+
+  async enableCampaign(campaignId: string): Promise<string> {
+    const resourceName = `customers/${this.config.customerId}/campaigns/${campaignId}`;
+    const resp = await this.mutate("campaigns", [{
+      updateMask: "status",
+      update: {
+        resourceName,
+        status: "ENABLED",
+      },
+    }]);
+    return resp.results[0].resourceName;
   }
 
   async createCampaignBudget(name: string, dailyBudgetMicros: number): Promise<string> {

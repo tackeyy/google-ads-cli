@@ -3,9 +3,9 @@ import { buildConfig } from "../../lib/config.js";
 import { GadsClient } from "../../lib/client.js";
 
 export function registerCampaignsCommand(program: Command) {
-  program
+  const campaignsCmd = program
     .command("campaigns")
-    .description("キャンペーン一覧を取得する")
+    .description("キャンペーン管理")
     .option("--json", "JSON形式で出力")
     .action(async (opts) => {
       try {
@@ -33,6 +33,22 @@ export function registerCampaignsCommand(program: Command) {
             `${c.id.padEnd(12)}  ${c.name.padEnd(maxName)}  ${c.status.padEnd(10)}  ${c.budget}`
           );
         }
+      } catch (err) {
+        console.error("❌ エラー:", err instanceof Error ? err.message : err);
+        process.exit(1);
+      }
+    });
+
+  campaignsCmd
+    .command("enable")
+    .description("キャンペーンを PAUSED → ENABLED に変更する")
+    .requiredOption("--id <campaignId>", "有効化するキャンペーンID")
+    .action(async (opts) => {
+      try {
+        const config = buildConfig(process.env as Record<string, string>);
+        const client = new GadsClient(config);
+        const resourceName = await client.enableCampaign(opts.id);
+        console.log(`✅ キャンペーンを ENABLED に変更しました: ${resourceName}`);
       } catch (err) {
         console.error("❌ エラー:", err instanceof Error ? err.message : err);
         process.exit(1);
