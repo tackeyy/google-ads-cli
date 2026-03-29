@@ -120,6 +120,15 @@ export class GadsClient {
     return res.json() as Promise<{ results: Array<{ resourceName: string }> }>;
   }
 
+  async enableAdGroup(adGroupId: string): Promise<string> {
+    const resourceName = `customers/${this.config.customerId}/adGroups/${adGroupId}`;
+    const resp = await this.mutate('adGroups', [{
+      updateMask: 'status',
+      update: { resourceName, status: 'ENABLED' },
+    }]);
+    return resp.results[0].resourceName;
+  }
+
   async enableCampaign(campaignId: string): Promise<string> {
     const resourceName = `customers/${this.config.customerId}/campaigns/${campaignId}`;
     const resp = await this.mutate("campaigns", [{

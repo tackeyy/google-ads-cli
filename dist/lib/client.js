@@ -116,6 +116,14 @@ export class GadsClient {
         }
         return res.json();
     }
+    async enableAdGroup(adGroupId) {
+        const resourceName = `customers/${this.config.customerId}/adGroups/${adGroupId}`;
+        const resp = await this.mutate('adGroups', [{
+                updateMask: 'status',
+                update: { resourceName, status: 'ENABLED' },
+            }]);
+        return resp.results[0].resourceName;
+    }
     async enableCampaign(campaignId) {
         const resourceName = `customers/${this.config.customerId}/campaigns/${campaignId}`;
         const resp = await this.mutate("campaigns", [{
