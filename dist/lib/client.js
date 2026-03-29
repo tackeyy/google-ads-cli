@@ -125,7 +125,8 @@ export class GadsClient {
                     name,
                     status: "PAUSED",
                     advertisingChannelType: "SEARCH",
-                    maximizeClicks: {},
+                    targetSpend: {},
+                    containsEuPoliticalAdvertising: "DOES_NOT_CONTAIN_EU_POLITICAL_ADVERTISING",
                     networkSettings: {
                         targetGoogleSearch: true,
                         targetSearchNetwork: true,
