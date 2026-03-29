@@ -120,6 +120,49 @@ export class GadsClient {
     return res.json() as Promise<{ results: Array<{ resourceName: string }> }>;
   }
 
+  async enableAds(compositeIds: string[]): Promise<string[]> {
+    // compositeId format: "adGroupId~adId"
+    const operations = compositeIds.map((compositeId) => {
+      const resourceName = `customers/${this.config.customerId}/adGroupAds/${compositeId}`;
+      return {
+        updateMask: 'status',
+        update: { resourceName, status: 'ENABLED' },
+      };
+    });
+    const resp = await this.mutate('adGroupAds', operations);
+    return resp.results.map((r) => r.resourceName);
+  }
+
+  async listAdGroupIdsByCampaign(campaignId: string): Promise<string[]> {
+    const rows = await this.gaqlSearch(`
+      SELECT ad_group.id
+      FROM ad_group
+      WHERE campaign.id = '${campaignId}'
+      AND ad_group.status != 'REMOVED'
+    `);
+    return rows.map((row) => {
+      const r = row as { adGroup?: Record<string, unknown> };
+      return String(r.adGroup?.['id'] ?? '');
+    }).filter(Boolean);
+  }
+
+  async listAdCompositeIdsByCampaign(campaignId: string): Promise<string[]> {
+    const rows = await this.gaqlSearch(`
+      SELECT ad_group_ad.ad.id, ad_group_ad.ad_group
+      FROM ad_group_ad
+      WHERE campaign.id = '${campaignId}'
+      AND ad_group_ad.status != 'REMOVED'
+    `);
+    return rows.map((row) => {
+      const r = row as { adGroupAd?: Record<string, unknown> };
+      const adGroup = String(r.adGroupAd?.['adGroup'] ?? '');
+      const adId = String((r.adGroupAd?.['ad'] as Record<string, unknown>)?.['id'] ?? '');
+      // extract adGroupId from resourceName: customers/xxx/adGroups/yyy
+      const adGroupId = adGroup.split('/').pop() ?? '';
+      return `${adGroupId}~${adId}`;
+    }).filter((id) => !id.startsWith('~'));
+  }
+
   async enableAdGroup(adGroupId: string): Promise<string> {
     const resourceName = `customers/${this.config.customerId}/adGroups/${adGroupId}`;
     const resp = await this.mutate('adGroups', [{

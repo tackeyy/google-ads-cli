@@ -5,6 +5,7 @@ import { registerCampaignsCommand } from "./commands/campaigns.js";
 import { registerInsightsCommand } from "./commands/insights.js";
 import { registerCreateCommand } from "./commands/create.js";
 import { registerAdGroupsCommand } from "./commands/adgroups.js";
+import { registerAdsCommand } from "./commands/ads.js";
 const program = new Command();
 program
     .name("google-ads-cli")
@@ -15,5 +16,6 @@ registerCampaignsCommand(program);
 registerInsightsCommand(program);
 registerCreateCommand(program);
 registerAdGroupsCommand(program);
+registerAdsCommand(program);
 program.parse();
 //# sourceMappingURL=index.js.map

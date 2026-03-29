@@ -32,14 +32,37 @@ export function registerCampaignsCommand(program) {
     });
     campaignsCmd
         .command("enable")
-        .description("キャンペーンを PAUSED → ENABLED に変更する")
+        .description("キャンペーンを PAUSED → ENABLED に変更する（配下の広告グループ・広告も一括有効化）")
         .requiredOption("--id <campaignId>", "有効化するキャンペーンID")
         .action(async (opts) => {
         try {
             const config = buildConfig(process.env);
             const client = new GadsClient(config);
-            const resourceName = await client.enableCampaign(opts.id);
-            console.log(`✅ キャンペーンを ENABLED に変更しました: ${resourceName}`);
+            // 1. キャンペーン自体を ENABLED に変更
+            const campaignRn = await client.enableCampaign(opts.id);
+            console.log(`✅ キャンペーンを ENABLED に変更しました: ${campaignRn}`);
+            // 2. 配下の広告グループをすべて ENABLED に変更
+            const adGroupIds = await client.listAdGroupIdsByCampaign(opts.id);
+            if (adGroupIds.length > 0) {
+                for (const agId of adGroupIds) {
+                    const agRn = await client.enableAdGroup(agId);
+                    console.log(`✅ 広告グループを ENABLED に変更しました: ${agRn}`);
+                }
+            }
+            else {
+                console.log("ℹ️  配下の広告グループなし");
+            }
+            // 3. 配下の広告をすべて ENABLED に変更
+            const adCompositeIds = await client.listAdCompositeIdsByCampaign(opts.id);
+            if (adCompositeIds.length > 0) {
+                const adRns = await client.enableAds(adCompositeIds);
+                for (const rn of adRns) {
+                    console.log(`✅ 広告を ENABLED に変更しました: ${rn}`);
+                }
+            }
+            else {
+                console.log("ℹ️  配下の広告なし");
+            }
         }
         catch (err) {
             console.error("❌ エラー:", err instanceof Error ? err.message : err);

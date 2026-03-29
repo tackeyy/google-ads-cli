@@ -18,6 +18,9 @@ export declare class GadsClient {
         budget: string;
     }>>;
     private mutate;
+    enableAds(compositeIds: string[]): Promise<string[]>;
+    listAdGroupIdsByCampaign(campaignId: string): Promise<string[]>;
+    listAdCompositeIdsByCampaign(campaignId: string): Promise<string[]>;
     enableAdGroup(adGroupId: string): Promise<string>;
     enableCampaign(campaignId: string): Promise<string>;
     createCampaignBudget(name: string, dailyBudgetMicros: number): Promise<string>;
