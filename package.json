@@ -1,0 +1,30 @@
+{
+  "name": "google-ads-cli",
+  "version": "0.1.0",
+  "description": "Google Ads CLI — キャンペーン・広告セット・インサイト管理",
+  "type": "module",
+  "bin": {
+    "google-ads-cli": "dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepare": "echo 'skip prepare'"
+  },
+  "dependencies": {
+    "commander": "^13.1.0",
+    "google-auth-library": "^10.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.5",
+    "typescript": "^5.7.3",
+    "vitest": "^3.1.0"
+  },
+  "files": [
+    "dist/cli",
+    "dist/lib"
+  ],
+  "license": "MIT",
+  "author": "tackeyy"
+}
