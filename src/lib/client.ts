@@ -212,6 +212,18 @@ export class GadsClient {
     return resp.results[0].resourceName;
   }
 
+  async pauseCampaign(campaignId: string): Promise<string> {
+    const resourceName = `customers/${this.config.customerId}/campaigns/${campaignId}`;
+    const resp = await this.mutate("campaigns", [{
+      updateMask: "status",
+      update: {
+        resourceName,
+        status: "PAUSED",
+      },
+    }]);
+    return resp.results[0].resourceName;
+  }
+
   async createCampaignBudget(name: string, dailyBudgetMicros: number): Promise<string> {
     const resp = await this.mutate("campaignBudgets", [{
       create: {

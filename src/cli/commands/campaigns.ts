@@ -40,6 +40,22 @@ export function registerCampaignsCommand(program: Command) {
     });
 
   campaignsCmd
+    .command("pause")
+    .description("キャンペーンを ENABLED → PAUSED に変更する（一時停止）")
+    .requiredOption("--id <campaignId>", "一時停止するキャンペーンID")
+    .action(async (opts) => {
+      try {
+        const config = buildConfig(process.env as Record<string, string>);
+        const client = new GadsClient(config);
+        const campaignRn = await client.pauseCampaign(opts.id);
+        console.log(`⏸️  キャンペーンを PAUSED に変更しました: ${campaignRn}`);
+      } catch (err) {
+        console.error("❌ エラー:", err instanceof Error ? err.message : err);
+        process.exit(1);
+      }
+    });
+
+  campaignsCmd
     .command("enable")
     .description("キャンペーンを PAUSED → ENABLED に変更する（配下の広告グループ・広告も一括有効化）")
     .requiredOption("--id <campaignId>", "有効化するキャンペーンID")
