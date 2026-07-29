@@ -2,7 +2,8 @@
 
 ## Overview
 
-Google Ads CLI uses [Vitest](https://vitest.dev/) as its testing framework. All code contributions must include comprehensive tests.
+Google Ads CLI uses [Vitest](https://vitest.dev/) as its testing framework.
+All code contributions must include comprehensive tests.
 
 ## Test Philosophy
 
@@ -224,7 +225,7 @@ node --inspect-brk node_modules/.bin/vitest run src/__tests__/api.test.ts
 ## Test Coverage Requirements
 
 | Category | Requirement |
-|----------|-------------|
+| -------- | ----------- |
 | **New Features** | 100% coverage |
 | **Bug Fixes** | Regression test required |
 | **Refactoring** | Maintain existing coverage |
