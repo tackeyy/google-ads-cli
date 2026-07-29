@@ -1,6 +1,10 @@
 import type { Command } from "commander";
 import { buildConfig, maskToken } from "../../lib/config.js";
 import { GadsClient } from "../../lib/client.js";
+import {
+  readGoogleAdsRefreshToken,
+  revokeGoogleOAuthToken,
+} from "../../lib/oauth-revoke.js";
 
 export function registerAuthCommand(program: Command) {
   const auth = program.command("auth").description("認証管理");
@@ -25,6 +29,33 @@ export function registerAuthCommand(program: Command) {
         console.log(`  タイムゾーン: ${account.timeZone}`);
       } catch (err) {
         console.error("❌ 認証失敗:", err instanceof Error ? err.message : err);
+        process.exit(1);
+      }
+    });
+
+  auth
+    .command("revoke")
+    .description(
+      "GOOGLE_ADS_REFRESH_TOKENと同じGoogle OAuth grantの関連token/scopesを失効する",
+    )
+    .requiredOption(
+      "--confirm",
+      "同じOAuth grantの関連token/scopesも失効する操作を明示的に確認する",
+    )
+    .action(async () => {
+      try {
+        const refreshToken = readGoogleAdsRefreshToken(process.env);
+        const result = await revokeGoogleOAuthToken(refreshToken);
+        if (result.status === "revoked") {
+          console.log("Google Ads OAuth refresh token was revoked.");
+        } else {
+          console.log("Google Ads OAuth refresh token was already invalid.");
+        }
+      } catch (err) {
+        console.error(
+          "Google Ads OAuth token revocation failed:",
+          err instanceof Error ? err.message : "unknown error",
+        );
         process.exit(1);
       }
     });
