@@ -216,6 +216,45 @@ describe("parseHistoricalMetricsResponse", () => {
     expect(parsed.notReturned).toEqual([]);
   });
 
+  it("正規化で同じになる別の語へ値を割り当てない", () => {
+    const parsed = parseHistoricalMetricsResponse(
+      { results: [{ text: "x2", keywordMetrics: { avgMonthlySearches: "0" } }] },
+      normalized(["x²", "x2"]),
+      now,
+    );
+    expect(parsed.results[0].requestedKeywords).toEqual(["x2"]);
+    expect(parsed.notReturned).toEqual(["x²"]);
+  });
+
+  it("別々の行に返った語は完全一致の行だけに結び付ける", () => {
+    const parsed = parseHistoricalMetricsResponse(
+      { results: [{ text: "x2" }, { text: "x²" }] },
+      normalized(["x²", "x2"]),
+      now,
+    );
+    expect(parsed.results.map((r) => r.requestedKeywords)).toEqual([["x2"], ["x²"]]);
+    expect(parsed.notReturned).toEqual([]);
+  });
+
+  it("完全一致の行がある語は、正規化だけで一致する別の行に結び付けない", () => {
+    const parsed = parseHistoricalMetricsResponse(
+      { results: [{ text: "x2" }, { text: "x²" }] },
+      normalized(["x2"]),
+      now,
+    );
+    expect(parsed.results.map((r) => r.requestedKeywords)).toEqual([["x2"], []]);
+  });
+
+  it("APIが近似語として明示した語は正規化で同じ語でも結び付ける", () => {
+    const parsed = parseHistoricalMetricsResponse(
+      { results: [{ text: "x2", closeVariants: ["x²"] }] },
+      normalized(["x²", "x2"]),
+      now,
+    );
+    expect(parsed.results[0].requestedKeywords).toEqual(["x²", "x2"]);
+    expect(parsed.notReturned).toEqual([]);
+  });
+
   it("依頼していない語の結果も捨てずに残す", () => {
     const parsed = parseHistoricalMetricsResponse({ results: [{ text: "z" }] }, normalized(["a"]), now);
     expect(parsed.results[0]).toMatchObject({ text: "z", requestedKeywords: [] });

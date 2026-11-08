@@ -79,16 +79,23 @@ export function parseHistoricalMetricsResponse(response: unknown, input: Keyword
   }
   const returned = new Set<string>();
   const rawResults = record(response).results;
-  const results = (Array.isArray(rawResults) ? rawResults : []).map((value: unknown) => {
+  const rows = (Array.isArray(rawResults) ? rawResults : []).map((value: unknown) => {
     const row = record(value);
     const text = typeof row.text === "string" ? row.text : null;
     const closeVariants = Array.isArray(row.closeVariants)
       ? row.closeVariants.filter((word): word is string => typeof word === "string") : [];
+    return { row, text, closeVariants, words: [...(text === null ? [] : [text]), ...closeVariants] };
+  });
+  const exactWords = new Set(rows.flatMap(({ words }) => words));
+  const results = rows.map(({ row, text, closeVariants, words }) => {
     const matched = new Set<string>();
-    for (const word of [...(text === null ? [] : [text]), ...closeVariants]) {
-      for (const original of requested.get(matchKey(word)) ?? []) {
-        matched.add(original);
-        returned.add(original);
+    for (const word of words) {
+      const originals = requested.get(matchKey(word)) ?? [];
+      for (const original of originals) {
+        if (original === word || (originals.length === 1 && !exactWords.has(original))) {
+          matched.add(original);
+          returned.add(original);
+        }
       }
     }
     const metrics = record(row.keywordMetrics);
