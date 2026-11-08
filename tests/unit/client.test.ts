@@ -2,17 +2,15 @@ import { describe, it, expect } from "vitest";
 import { buildConfig, maskToken } from "../../src/lib/config.js";
 
 describe("buildConfig", () => {
+  const required = {
+    GOOGLE_ADS_CLIENT_ID: "client-id-123",
+    GOOGLE_ADS_CLIENT_SECRET: "client-secret-123",
+    GOOGLE_ADS_REFRESH_TOKEN: "refresh-token-123",
+    GOOGLE_ADS_CUSTOMER_ID: "8615999793",
+  };
+
   it("環境変数から設定を構築できる", () => {
-    const env = {
-      GOOGLE_ADS_DEVELOPER_TOKEN: "dev-token-123",
-      GOOGLE_ADS_CLIENT_ID: "client-id-123",
-      GOOGLE_ADS_CLIENT_SECRET: "client-secret-123",
-      GOOGLE_ADS_REFRESH_TOKEN: "refresh-token-123",
-      GOOGLE_ADS_CUSTOMER_ID: "8615999793",
-      GOOGLE_ADS_LOGIN_CUSTOMER_ID: "2398179748",
-    };
-    const config = buildConfig(env);
-    expect(config.developerToken).toBe("dev-token-123");
+    const config = buildConfig({ ...required, GOOGLE_ADS_LOGIN_CUSTOMER_ID: "2398179748" });
     expect(config.clientId).toBe("client-id-123");
     expect(config.clientSecret).toBe("client-secret-123");
     expect(config.refreshToken).toBe("refresh-token-123");
@@ -20,29 +18,21 @@ describe("buildConfig", () => {
     expect(config.loginCustomerId).toBe("2398179748");
   });
 
-  it("必須環境変数が欠けている場合はエラーを投げる", () => {
-    expect(() => buildConfig({})).toThrow("GOOGLE_ADS_DEVELOPER_TOKEN");
+  it("developer tokenとlogin customer idは無くてもよい", () => {
+    const config = buildConfig(required);
+    expect(config.loginCustomerId).toBeUndefined();
+    expect(config).not.toHaveProperty("developerToken");
   });
 
-  it("GOOGLE_ADS_CUSTOMER_IDが欠けている場合はエラーを投げる", () => {
-    const env = {
-      GOOGLE_ADS_DEVELOPER_TOKEN: "dev-token",
-      GOOGLE_ADS_CLIENT_ID: "client-id",
-      GOOGLE_ADS_CLIENT_SECRET: "client-secret",
-      GOOGLE_ADS_REFRESH_TOKEN: "refresh-token",
-    };
-    expect(() => buildConfig(env)).toThrow("GOOGLE_ADS_CUSTOMER_ID");
+  it("developer tokenが設定されていても設定に持たない", () => {
+    const config = buildConfig({ ...required, GOOGLE_ADS_DEVELOPER_TOKEN: "old-token" });
+    expect(JSON.stringify(config)).not.toContain("old-token");
   });
 
-  it("GOOGLE_ADS_LOGIN_CUSTOMER_IDが欠けている場合はエラーを投げる", () => {
-    const env = {
-      GOOGLE_ADS_DEVELOPER_TOKEN: "dev-token",
-      GOOGLE_ADS_CLIENT_ID: "client-id",
-      GOOGLE_ADS_CLIENT_SECRET: "client-secret",
-      GOOGLE_ADS_REFRESH_TOKEN: "refresh-token",
-      GOOGLE_ADS_CUSTOMER_ID: "8615999793",
-    };
-    expect(() => buildConfig(env)).toThrow("GOOGLE_ADS_LOGIN_CUSTOMER_ID");
+  it.each(Object.keys(required))("%sが欠けている場合はエラーを投げる", (key) => {
+    const env: Record<string, string | undefined> = { ...required };
+    delete env[key];
+    expect(() => buildConfig(env)).toThrow(key);
   });
 });
 

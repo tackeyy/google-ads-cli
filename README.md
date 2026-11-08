@@ -15,7 +15,7 @@ Google Ads API を使ったキャンペーン管理・インサイト取得・�
 ## 必要条件
 
 - Node.js 22+
-- Google Ads API アクセス（Developer Token + OAuth2 認証情報）
+- Google Ads API アクセス（OAuth2 認証情報）
 
 ## セットアップ
 
@@ -32,13 +32,14 @@ npm link  # または npx tsx src/cli/index.ts で直接実行
 `.env` ファイルまたはシェル環境に以下を設定してください:
 
 ```bash
-GOOGLE_ADS_DEVELOPER_TOKEN=your_developer_token
 GOOGLE_ADS_CLIENT_ID=your_client_id
 GOOGLE_ADS_CLIENT_SECRET=your_client_secret
 GOOGLE_ADS_REFRESH_TOKEN=your_refresh_token
 GOOGLE_ADS_CUSTOMER_ID=your_customer_id          # 数字のみ（ハイフンなし）
-GOOGLE_ADS_LOGIN_CUSTOMER_ID=your_mcc_account_id # MCC（管理者）アカウントID
+GOOGLE_ADS_LOGIN_CUSTOMER_ID=your_mcc_account_id # 任意。マネージャーアカウント経由のときだけ設定
 ```
+
+Google Ads APIのアクセス権はOAuthクライアントのGoogle Cloudプロジェクトで決まります。
 
 > ⚠️ `.env` ファイルをリポジトリにコミットしないでください（`.gitignore` で除外済み）
 
@@ -89,12 +90,11 @@ google-ads-cli budget-check --json
 - name: Google Ads 予算チェック
   run: google-ads-cli budget-check --threshold 10000
   env:
-    GOOGLE_ADS_DEVELOPER_TOKEN: ${{ secrets.GOOGLE_ADS_DEVELOPER_TOKEN }}
     GOOGLE_ADS_CLIENT_ID: ${{ secrets.GOOGLE_ADS_CLIENT_ID }}
     GOOGLE_ADS_CLIENT_SECRET: ${{ secrets.GOOGLE_ADS_CLIENT_SECRET }}
     GOOGLE_ADS_REFRESH_TOKEN: ${{ secrets.GOOGLE_ADS_REFRESH_TOKEN }}
     GOOGLE_ADS_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_CUSTOMER_ID }}
-    GOOGLE_ADS_LOGIN_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_LOGIN_CUSTOMER_ID }}
+    GOOGLE_ADS_LOGIN_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_LOGIN_CUSTOMER_ID }} # 任意。マネージャーアカウント経由のときだけ設定
 ```
 
 ### インサイト取得
