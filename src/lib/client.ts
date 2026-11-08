@@ -31,6 +31,20 @@ export class GadsClient {
     return headers;
   }
 
+  async generateKeywordHistoricalMetrics(body: unknown): Promise<unknown> {
+    const token = await this.getAccessToken();
+    const res = await fetch(`${BASE_URL}/customers/${this.config.customerId}:generateKeywordHistoricalMetrics`, {
+      method: "POST",
+      headers: this.buildHeaders(token),
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`API エラー ${res.status}: ${body}`);
+    }
+    return res.json();
+  }
+
   private async gaqlSearch(gaql: string): Promise<Record<string, unknown>[]> {
     const token = await this.getAccessToken();
     const url = `${BASE_URL}/customers/${this.config.customerId}/googleAds:searchStream`;
