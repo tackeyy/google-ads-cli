@@ -16,7 +16,6 @@ export function registerAuthCommand(program: Command) {
       try {
         const config = buildConfig(process.env as Record<string, string>);
         console.log("認証情報チェック中...");
-        console.log(`  Developer Token: ${maskToken(config.developerToken)}`);
         console.log(`  Client ID: ${maskToken(config.clientId)}`);
         console.log(`  Refresh Token: ${maskToken(config.refreshToken)}`);
         console.log(`  Customer ID: ${config.customerId}`);

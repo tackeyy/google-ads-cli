@@ -1,7 +1,7 @@
 import { OAuth2Client } from "google-auth-library";
 import type { GadsConfig } from "./config.js";
 
-const API_VERSION = "v20";
+const API_VERSION = "v26";
 const BASE_URL = `https://googleads.googleapis.com/${API_VERSION}`;
 
 export class GadsClient {
@@ -20,17 +20,23 @@ export class GadsClient {
     return token;
   }
 
+  private buildHeaders(token: string): Record<string, string> {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    };
+    if (this.config.loginCustomerId) {
+      headers["login-customer-id"] = this.config.loginCustomerId;
+    }
+    return headers;
+  }
+
   private async gaqlSearch(gaql: string): Promise<Record<string, unknown>[]> {
     const token = await this.getAccessToken();
     const url = `${BASE_URL}/customers/${this.config.customerId}/googleAds:searchStream`;
     const res = await fetch(url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "developer-token": this.config.developerToken,
-        "login-customer-id": this.config.loginCustomerId,
-        "Content-Type": "application/json",
-      },
+      headers: this.buildHeaders(token),
       body: JSON.stringify({ query: gaql }),
     });
     if (!res.ok) {
@@ -129,12 +135,7 @@ export class GadsClient {
     const url = `${BASE_URL}/customers/${this.config.customerId}/${resource}:mutate`;
     const res = await fetch(url, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "developer-token": this.config.developerToken,
-        "login-customer-id": this.config.loginCustomerId,
-        "Content-Type": "application/json",
-      },
+      headers: this.buildHeaders(token),
       body: JSON.stringify({ operations }),
     });
     if (!res.ok) {
