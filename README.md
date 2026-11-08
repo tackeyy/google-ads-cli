@@ -104,6 +104,28 @@ google-ads-cli insights --from 2026-03-01 --to 2026-03-29
 google-ads-cli insights --from 2026-03-01 --to 2026-03-29 --json
 ```
 
+### キーワードの検索量
+
+既存キーワードの月間検索量を読み取り専用で取得します。
+この機能にはGoogle Ads APIのBasic以上のアクセスレベルが必要です。
+既定値は日本（地域ID: `2392`）、日本語（言語ID: `1005`）、Google検索（`GOOGLE_SEARCH`）です。
+
+```bash
+npx tsx src/cli/index.ts keywords volume --keyword "生成AI 法人" --keyword "AI 導入"
+npx tsx src/cli/index.ts keywords volume --file keywords.txt --keyword "追加の語" --json
+npx tsx src/cli/index.ts keywords volume --keyword "生成AI 法人" --from 2025-11 --to 2026-10
+npx tsx src/cli/index.ts keywords volume --keyword "生成AI 法人" --geo 2392 --language 1005 --network GOOGLE_SEARCH_AND_PARTNERS
+```
+
+`--file`はUTF-8の1行1語のファイルを読み込み、`--keyword`と併用できます。
+空行と前後の空白、重複を除いた最大10,000語を1リクエストで取得し、自動リトライは行いません。
+期間は`--from`と`--to`を両方指定します。省略時はAPIの既定期間を使用します。
+
+検索数はGoogleの推計で、近似語は同じ結果に統合される場合があります。
+値が省略された場合は通常出力で「未取得」、JSONで`null`となり、明示された`0`とは区別します。
+結果が返らない語は「未取得の語」（JSONでは`notReturned`）として列挙し、0件と扱いません。
+JSONには取得条件、平均月間検索数、競合度、入札単価の指標（micros）、年月順の月別検索数も含まれます。
+
 ### キャンペーン有効化
 
 ```bash

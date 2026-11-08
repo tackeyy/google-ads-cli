@@ -7,6 +7,7 @@ import { registerCreateCommand } from "./commands/create.js";
 import { registerAdGroupsCommand } from "./commands/adgroups.js";
 import { registerAdsCommand } from "./commands/ads.js";
 import { registerBudgetCheckCommand } from "./commands/budget-check.js";
+import { registerKeywordsCommand } from "./commands/keywords.js";
 
 const program = new Command();
 
@@ -22,5 +23,6 @@ registerCreateCommand(program);
 registerAdGroupsCommand(program);
 registerAdsCommand(program);
 registerBudgetCheckCommand(program);
+registerKeywordsCommand(program);
 
 program.parse();
